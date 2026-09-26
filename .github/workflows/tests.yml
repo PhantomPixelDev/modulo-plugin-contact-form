@@ -1,0 +1,57 @@
+name: tests
+
+# The plugin runs inside Modulo core, so its tests do too: check out core,
+# put this plugin where a site would have it (plugins/ContactForm) and run the
+# tests in core's test setup. Core's main branch by default; set CORE_REF to
+# test against another.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      core_ref:
+        description: Modulo core branch or tag to test against
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: tests (core ${{ inputs.core_ref || 'main' }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Modulo core
+        uses: actions/checkout@v4
+        with:
+          repository: PhantomPixelDev/modulo-cms
+          ref: ${{ inputs.core_ref || 'main' }}
+
+      # Older core versions still carried a copy of this plugin
+      - name: Make room for this plugin
+        run: rm -rf plugins/ContactForm
+
+      - name: Check out this plugin into it
+        uses: actions/checkout@v4
+        with:
+          path: plugins/ContactForm
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          tools: composer:v2
+          coverage: none
+
+      - name: Install core dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Put the plugin's tests into core's suite
+        run: |
+          mkdir -p tests/Feature/Plugins
+          mv plugins/ContactForm/tests tests/Feature/Plugins/ContactForm
+
+      - name: Tests
+        run: ./vendor/bin/pest tests/Feature/Plugins/ContactForm

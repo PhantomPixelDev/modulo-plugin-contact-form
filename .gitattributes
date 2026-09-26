@@ -4,3 +4,5 @@
 /.github export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
+# Tests run in CI against Modulo core; they are not part of the plugin
+/tests export-ignore
