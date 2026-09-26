@@ -2,7 +2,7 @@
   "name": "Contact Form",
   "slug": "contact-form",
   "namespace": "ContactForm",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Simple contact form with shortcode, email notification, and DB storage.",
   "author": "Modulo CMS",
   "service_provider": "Plugins\\ContactForm\\ContactFormServiceProvider",
@@ -11,5 +11,44 @@
     "recipient_email": "",
     "default_subject": "Contact request",
     "success_message": "Thanks! Your message has been sent."
-  }
+  },
+  "admin": {
+    "menu": [
+      {
+        "label": "Contact form",
+        "label_key": "contact-form::settings.menu",
+        "icon": "mail",
+        "href": "/dashboard/admin/plugins/contact-form/settings",
+        "permissions": [
+          "install plugins"
+        ]
+      }
+    ]
+  },
+  "settings_schema": [
+    {
+      "key": "recipient_email",
+      "type": "email",
+      "label": "Send messages to",
+      "label_key": "contact-form::settings.recipient_email",
+      "help": "Leave empty to use the site's admin email address.",
+      "help_key": "contact-form::settings.recipient_email_help"
+    },
+    {
+      "key": "default_subject",
+      "type": "text",
+      "label": "Subject",
+      "label_key": "contact-form::settings.default_subject",
+      "help": "Used when the visitor leaves the subject empty.",
+      "help_key": "contact-form::settings.default_subject_help"
+    },
+    {
+      "key": "success_message",
+      "type": "textarea",
+      "label": "Message after sending",
+      "label_key": "contact-form::settings.success_message",
+      "help": "Shown to the visitor once their message is sent.",
+      "help_key": "contact-form::settings.success_message_help"
+    }
+  ]
 }
