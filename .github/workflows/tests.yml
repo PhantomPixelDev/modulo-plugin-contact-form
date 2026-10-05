@@ -20,8 +20,26 @@ permissions:
 
 jobs:
   php:
-    name: tests (core ${{ inputs.core_ref || 'main' }})
+    name: tests (${{ matrix.database }}, core ${{ inputs.core_ref || 'main' }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        database: [sqlite, pgsql]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: modulo_test
+          POSTGRES_USER: modulo_test
+          POSTGRES_PASSWORD: modulo_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U modulo_test -d modulo_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USERNAME: modulo_test
+      DB_PASSWORD: modulo_test
     steps:
       - name: Check out Modulo core
         uses: actions/checkout@v4
@@ -54,4 +72,9 @@ jobs:
           mv plugins/ContactForm/tests tests/Feature/Plugins/ContactForm
 
       - name: Tests
-        run: ./vendor/bin/pest tests/Feature/Plugins/ContactForm
+        run: |
+          if [ "${{ matrix.database }}" = pgsql ]; then
+            ./vendor/bin/pest -c phpunit.pgsql.xml tests/Feature/Plugins/ContactForm
+          else
+            ./vendor/bin/pest tests/Feature/Plugins/ContactForm
+          fi
