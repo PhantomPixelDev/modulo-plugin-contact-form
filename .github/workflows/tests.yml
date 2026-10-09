@@ -27,7 +27,7 @@ jobs:
         database: [sqlite, pgsql]
     services:
       postgres:
-        image: postgres:16-alpine
+        image: public.ecr.aws/docker/library/postgres:16-alpine
         env:
           POSTGRES_DB: modulo_test
           POSTGRES_USER: modulo_test
