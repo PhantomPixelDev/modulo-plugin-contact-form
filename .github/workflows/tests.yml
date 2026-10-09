@@ -74,7 +74,9 @@ jobs:
       - name: Tests
         run: |
           if [ "${{ matrix.database }}" = pgsql ]; then
-            ./vendor/bin/pest -c phpunit.pgsql.xml tests/Feature/Plugins/ContactForm
+            config=config/testing/phpunit.pgsql.xml
+            if [ ! -f "$config" ]; then config=phpunit.pgsql.xml; fi
+            ./vendor/bin/pest -c "$config" tests/Feature/Plugins/ContactForm
           else
             ./vendor/bin/pest tests/Feature/Plugins/ContactForm
           fi
