@@ -12,6 +12,21 @@ beforeEach(function () {
     Mail::fake();
 });
 
+it('acknowledges honeypot submissions without storing data or queuing mail', function () {
+    $this->postJson('/contact-form/submit', [
+        'website' => 'https://spam.example', 'name' => 'Bot', 'email' => 'bot@example.test', 'message' => 'Spam',
+    ])->assertOk()->assertJsonPath('success', true);
+    expect(ContactSubmission::count())->toBe(0);
+    Mail::assertNothingQueued();
+});
+
+it('queues delivery with bounded retries after the submission is committed', function () {
+    $this->postJson('/contact-form/submit', [
+        'website' => '', 'name' => 'Visitor', 'email' => 'visitor@example.test', 'message' => 'A real message',
+    ])->assertOk();
+    Mail::assertQueued(ContactFormSubmitted::class, fn ($mail) => $mail->tries === 3 && $mail->backoff === [60, 300] && $mail->afterCommit === true);
+});
+
 it('rejects malformed or oversized contact fields without storing or queuing mail', function (array $invalid, string $field) {
     $this->postJson('/contact-form/submit', array_merge([
         'name' => 'Visitor', 'email' => 'visitor@example.test', 'message' => 'Hello',

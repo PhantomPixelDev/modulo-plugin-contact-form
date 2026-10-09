@@ -17,6 +17,10 @@
 
     <form method="POST" action="{{ route('contact-form.submit') }}" class="space-y-4">
         @csrf
+        <div class="hidden" aria-hidden="true">
+            <label for="contact_website">Website</label>
+            <input id="contact_website" name="website" type="text" tabindex="-1" autocomplete="off" value="">
+        </div>
         <div>
             <label class="block text-sm font-medium text-foreground" for="contact_name">Name</label>
             <input

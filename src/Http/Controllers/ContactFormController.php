@@ -15,6 +15,12 @@ class ContactFormController
 {
     public function store(Request $request): JsonResponse|RedirectResponse
     {
+        // This field is invisible to visitors. A bot filling every field gets
+        // the usual acknowledgement without storing data or sending mail.
+        if ($request->filled('website')) {
+            return $request->wantsJson() ? response()->json(['success' => true])
+                : back()->with('contact_form_success', 'Thanks! Your message has been sent.');
+        }
         if (! schema_has_table('contact_submissions')) {
             $message = 'Contact form storage is not available yet. Run migrations to create the table.';
             if ($request->wantsJson()) {
@@ -50,7 +56,7 @@ class ContactFormController
 
         if ($recipient) {
             try {
-                Mail::to($recipient)->send(new ContactFormSubmitted($submission));
+                Mail::to($recipient)->queue((new ContactFormSubmitted($submission))->afterCommit());
             } catch (\Throwable $e) {
                 logger()->error('Failed to send contact form email: '.$e->getMessage());
             }
