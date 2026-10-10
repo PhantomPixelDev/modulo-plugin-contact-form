@@ -20,11 +20,12 @@ permissions:
 
 jobs:
   php:
-    name: tests (${{ matrix.database }}, core ${{ inputs.core_ref || 'main' }})
+    name: tests (${{ matrix.database }}, PHP ${{ matrix.php }}, core ${{ inputs.core_ref || 'main' }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         database: [sqlite, pgsql]
+        php: ['8.4', '8.5']
     services:
       postgres:
         image: public.ecr.aws/docker/library/postgres:16-alpine
@@ -59,7 +60,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.4
+          php-version: ${{ matrix.php }}
           tools: composer:v2
           coverage: none
 
